@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="Style.css">
+    <link rel="icon" type="image/png" href="../icon.png" sizes="32x32">
+<style>
+.yes{color: green;}
+.no{color: red;}
+.inProgress{color:rgb(142, 142, 225);}
+.notStarted{color:rgb(255, 255, 255);}
+html{background-color: rgb(20, 20, 20); color: rgb(230,230,230); font-family: JetBrains Mono;}
+
+</style>
+</head>
+<body >
+
+<div style="margin-left: 500px; margin-top:100px ; font-size: 1em; ">
+  <pre>visualize houdini sensor heatmaps on the web</pre>
+  
+<pre>restAPI</pre>
+</div>
+
+<div style="margin-left: 500px; margin-top:100px ; ">
+<pre style="float: left;font-family: Jetbrains mono; font-size: 0.5em; ">
+ sensor 1
+ ┌─────────┐
+ │         │
+ │         │
+ │         │
+ │         │
+ │         │
+ └─────────┴──
+ sensor 2
+ ┌─────────┐
+ │         │
+ │         │
+ │         │
+ │         │
+ │         │
+ └─────────┴──
+ sensor 3
+ ┌─────────┐
+ │         │
+ │         │
+ │         │
+ │         │
+ │         │
+ └─────────┴──
+ sensor 4
+ ┌─────────┐
+ │         │
+ │         │
+ │         │
+ │         │
+ │         │
+ └─────────┴──
+  sensor 5
+ ┌─────────┐
+ │         │
+ │         │
+ │         │
+ │         │
+ │         │
+ └─────────┴──
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>   
+<pre style="; font-family: Jetbrains mono; font-size: 0.5em; ">
+
+  
+                                 │
+                                 │
+                                 │
+                                 │
+                                 │
+  post request                   │     hosted on personal linux system or cloud server (postData in the cloud)
+──────────────────────┐          │
+                      │          │     ┌─────────────────────────────────────────────────────────┐
+                      │          │     │                                                         │
+                      │          │     │ influxData                                              │
+                      │          │     │                                                         │
+                      │          │     │ ┌─────────────────────────────────────────────────────┐ │           1. sensors (arduino/dramco UNO/ lillyGO)
+                      │          │     │ │                                                     │ │              send sensordata (temp/luminosity/position..)
+   post request       │          │     │ │   ┌───────────────────┐          ┌─────────────┐    │ │              over WIFI to a REST API in influxData.
+────────────────────┐ │          │     │ │   │                   │          │             │    │ │
+                    │ │          │     │ │   │  restAPI          │          │ influxDB    │    │ │              this can happen in C++ through a POST request
+                    │ │          │     │ │   │                   │          │             │    │ │
+                    │ └──────────┼─────┼─┼───┼───►               │          │             │    │ │
+                    │            │     │ │   │                   │          │             │    │ │
+                    └────────────┼─────┼─┼───┼───►               │          │             │    │ │           2. inside influxData, the restAPI  sees what
+                                 │     │ │   │               ────┼──────────┼───►         │    │ │              the sensors send them, is it POST request,
+  post requestt      ┌───────────┼─────┼─┼───┼───►               │          │             │    │ │              than checks the REST API the requirments.
+─────────────────────┘           │     │ │   │                   │          │             │    │ │
+                      ┌──────────┼─────┼─┼───┼───►           ◄───┼──────────┼────         │    │ │              if they comply, then, the sensordasta is
+                      │          │     │ │   │                   │          │             │    │ │              processed and stored into the influxDatabase
+                      │ ┌────────┼─────┼─┼───┼───►               │          │             │    │ │
+                      │ │        │     │ │   │       ▲  ▲        │          │             │    │ │
+                      │ │        │     │ │   │       │  │        │          │             │    │ │           3. if the request is a GET request, then
+                      │ │        │     │ │   └───────┼──┼────────┘          └─────────────┘    │ │              the database will send the corresponding data
+  post request        │ │        │     │ │           │  │                                      │ │              to the requested party. e.g. a laptop or phone
+──────────────────────┘ │        │     │ └───────────┼──┼──────────────────────────────────────┘ │
+                        │        │     │             │  │                                        │
+                        │        │     └─────────────┼──┼────────────────────────────────────────┘
+                        │        │                   │  │
+                        │        │                   │  │
+                        │        │                   │  │
+                        │        │                   │  │
+  post request          │        └───────────────────┼──┼──────────────────────────────────────────────────────────────────────────
+────────────────────────┘                            │  │
+                                                     │  │
+                                                     │  │
+                                                     │  │                                       a cloud server or local machine runs influxData
+                                                     │  │                                             inside influxData is a RESTapi that can respond to requests
+                                                     │  │                                                     the REST api can communicate with the database and store or retrieve data
+                                                     │  │                                                            the REST api can now send or retrieve data to or from client
+                                                     │  └──────────────────┐
+                                        get request  │                     │  get request
+                                        ┌────────────┴─────┐       ┌───────┴──────────┐
+                                        │                  │       │                  │
+                                        │                  │       │                  │         REST API = REST = representational state transfer
+                                        │                  │       │                  │                    API = application programming interface
+                                        │                  │       │                  │
+                                        │                  │       │                  │                    does not store any context or history,
+                                        │                  │       │                  │
+                                        ├──────────────────┤       ├──────────────────┤
+                                        │┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼│       │┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼┼│
+                                        └──────────────────┘       └──────────────────┘
+                                        laptop                     smartphone
+
+</pre>
+</div>   
+ <br><br>
+ <p></p>
+<div style="margin-left: 500px; margin-top:100px ; ">
+<pre>fase progression</pre>
+
+<pre>
+  
+<div class="inProgress"><u>fase 1</u><br>send random data to the restAPI in influxdb and return it on a different computer
+<img style="width: 800px;" src="./src/data/1.png" alt=""></div>
+
+
+
+<div class="notStarted"><u>fase 2</u><br>send sensor data to the restAPI in influxdb and return it on a different computer
+<img style="width: 800px;" src="./src/data/2.png" alt=""></div>
+
+
+<div class="notStarted"><u>fase 3</u><br>send sensor data to the restAPI in influxdb and display it on a website
+<img style="width: 800px;" src="./src/data/3.png" alt="">
+</div>
+
+
+<div class="notStarted"><u>fase 4</u><br>send sensor data to the restAPI in influxdb and return it on a different computer that runs a houdini visualisation
+<img style="width: 800px;" src="./src/data/4.png" alt="">
+</div>
+
+
+<div class="notStarted"><u>fase 5</u><br>send sensor data to the restAPI in influxdb and return it on a different computer that runs a houdini visualisation, 
+makes a render and posts it to influxDB, and post the image and the data on a website
+<img style="width: 800px;" src="./src/data/5.png" alt=""></div>
+
+
+<div class="notStarted"><u>fase 6</u><br>fase 5 + drive a camera controller from the website to influxDB and use it to drive the camera in houdini
+<img style="width: 800px;" src="./src/data/6.png" alt="">
+</div>
+
+
+<div class="notStarted"><u>fase 7</u><br>fase 5 +  drive a camera controller from the website to influxDB and use it to drive the camera in houdini which 
+uses that view to display the sensor heatmap
+<img style="width: 800px;" src="./src/data/7.png" alt=""></div>
+</pre>
+
+
+</div>
+
+</body>
+</html>
+
